@@ -23,7 +23,7 @@ public class PessoaDAO {
             //buscar abrir conexão BD   
             Connection con = Conexao.getConexao();
             //Criar script sql de insert
-            String sql = "insert into pessoas values(null,?,?,?)";
+            String sql = "insert into pessoas values(null,?,?,?,?)";
             //Criar espaço para executar script
             PreparedStatement pst = con.prepareStatement(sql);
             pst.setString(1, pVO.getNome());
@@ -44,7 +44,7 @@ public class PessoaDAO {
         ArrayList<Pessoa> pessoas = new ArrayList<>();
         try {
             Connection con = Conexao.getConexao();
-            String sql = "select * from";
+            String sql = "select * from pessoas";
             PreparedStatement pst = con.prepareStatement(sql);
             ResultSet rs = pst.executeQuery();
             while (rs.next()) {

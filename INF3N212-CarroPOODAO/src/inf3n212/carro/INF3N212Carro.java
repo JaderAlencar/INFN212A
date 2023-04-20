@@ -11,6 +11,7 @@ import Model.Pessoa;
 import Util.Validadores;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import servicos.CarroServicos;
 import servicos.PessoaServicos;
 import servicos.ServicosFactory;
 
@@ -192,14 +193,17 @@ public class INF3N212Carro {
         String combustivel;
         Pessoa proprietario;
         boolean pCarro = true;
+        CarroServicos carroS = ServicosFactory.getCarroServicos();
+        PessoaServicos pessoaS = ServicosFactory.getPessoaServicos();
         do {
             System.out.print("Informe a Placa: ");
             placa = leia.nextLine();
             placa = placa.toUpperCase();
             pCarro = Validadores.validarPlaca(placa);
             if (pCarro) {
-                Carro carro = cadCarro.getCarroPlaca(placa);
-                if (carro == null) {
+                //Carro carro = cadCarro.getCarroPlaca(placa);
+                Carro carro = carroS.getCarroByDoc(placa);
+                if (carro.getPlaca() == null) {
                     System.out.print("Informe a marca: ");
                     marca = leia.nextLine();
                     System.out.print("Informe o modelo: ");
@@ -222,8 +226,9 @@ public class INF3N212Carro {
                     do {
                         System.out.print("Informe o CPF do proprietário: ");
                         String cpf = leia.nextLine();
-                        proprietario = cadPessoa.getPessoaCPF(cpf);
-                        if (proprietario == null) {
+                        //proprietario = cadPessoa.getPessoaCPF(cpf);
+                        proprietario = pessoaS.getPessoaByDoc(cpf);
+                        if (proprietario.getCpf() == null) {
                             System.out.println("CPF não cadastrado,"
                                     + " tente novamente!");
                         } else {
@@ -235,13 +240,14 @@ public class INF3N212Carro {
                             int op = leiaNumInt();
                             if (op == 2) {
                                 System.out.println("Tente outro CPF.");
-                                proprietario = null;
+                                proprietario.setCpf(null);
                             }
                         }
-                    } while (proprietario == null);
+                    } while (proprietario.getCpf() == null);
                     pCarro = false;
                     Carro c = new Carro(placa, marca, modelo, anoFab, anoMod, cor, tpCambio, combustivel, proprietario);
-                    cadCarro.addCarro(c);
+                    //cadCarro.addCarro(c);
+                    carroS.cadastroCarro(c);
                     System.out.println("Carro cadastrado com sucesso!");
                 } else {
                     System.out.println("Placa já cadastrada.");
@@ -256,7 +262,6 @@ public class INF3N212Carro {
 
     private static void editarPessoa() {
         PessoaServicos pessoaS = ServicosFactory.getPessoaServicos();
-
         System.out.println("-- Editar Pessoa --");
         boolean isCPF;
         do {
@@ -294,10 +299,9 @@ public class INF3N212Carro {
                         if (op < 0 || op > 4) {
                             System.out.println("Opção inválida, tente novamente!");
                         }
-                         if (op > 0 && op < 4) {
-                             pessoaS.atualizarPessoa(p);
-                            
-                         }
+                        if (op > 0 && op < 4) {
+                            pessoaS.atualizarPessoa(p);
+                        }
                     } while (isCPF);
                 } else {
                     System.out.println("CPF não cadastrado!");
@@ -318,6 +322,7 @@ public class INF3N212Carro {
 
     private static void editarCarro() {
         System.out.println("-- Editar Carro --");
+        CarroServicos carroS = ServicosFactory.getCarroServicos();
         boolean isPlaca;
         do {
             System.out.print("Informe a placa: ");
@@ -326,8 +331,8 @@ public class INF3N212Carro {
             isPlaca = Validadores.validarPlaca(placa);
             if (isPlaca) {
                 Carro c;
-                c = cadCarro.getCarroPlaca(placa);
-                if (c != null) {
+                c = carroS.getCarroByDoc(placa);
+                if (c.getPlaca() != null) {
                     System.out.println(c.toString());
                     System.out.println("O que deseja alterar?");
                     System.out.println("1 - Cor");
@@ -390,6 +395,8 @@ public class INF3N212Carro {
                     }
                     if (op < 0 || op > 5) {
                         System.out.println("Opção inválida!");
+                    }else{
+                        carroS.atualizarCarro(c);
                     }
                     isPlaca = false;
                 } else {
@@ -412,10 +419,10 @@ public class INF3N212Carro {
     private static void listarPessoa() {
         System.out.println("-- Lista de Pessoas --");
         PessoaServicos pessoaS = ServicosFactory.getPessoaServicos();
-        if (pessoaS.getPessoaDAO().isEmpty()) {
-            System.out.println("Não tem Pessoas cadastradas no sistema!");
+        if (pessoaS.getPessoas().isEmpty()) {
+            System.out.println("Não tem Pessoas cadastras no sistema!");
         } else {
-            for (Pessoa pessoa : pessoaS.getPessoaDAO()) {
+            for (Pessoa pessoa : pessoaS.getPessoas()) {
                 System.out.println(pessoa.toString());
             }
         }
@@ -423,8 +430,14 @@ public class INF3N212Carro {
 
     private static void listarCarro() {
         System.out.println("-- Lista de Carros --");
-        for (Carro carro : cadCarro.getCarros()) {
-            System.out.println(carro.toString());
+        CarroServicos carroS = ServicosFactory.getCarroServicos();
+        if (carroS.getCarros().isEmpty()) {
+            System.out.println("Não tem Pessoas cadastradas no sisteama!");
+        } else {
+
+            for (Carro carro : carroS.getCarros()) {
+                System.out.println(carro.toString());
+            }
         }
     }
 
@@ -476,15 +489,16 @@ public class INF3N212Carro {
         do {
             System.out.print("Informe uma placa: ");
             String placa = leia.nextLine().toUpperCase();
-            c = cadCarro.getCarroPlaca(placa);
-            if (c != null) {
+            CarroServicos carroS = ServicosFactory.getCarroServicos();
+            c = carroS.getCarroByDoc(placa);
+            if (c.getPlaca() != null) {
                 System.out.println("Deseja realmente deletar o Carro "
                         + c.getPlaca() + " | " + c.getModelo());
                 System.out.println("1 - Sim | 2 - Cancelar");
                 System.out.print("Digite aqui: ");
                 int op = leiaNumInt();
                 if (op == 1) {
-                    cadCarro.removeCarro(c);
+                    carroS.deletarCarro(c.getPlaca());
                     System.out.println("Carro deletado com sucesso.");
                 } else {
                     System.out.println("Operação cancelada pelo usuário.");
@@ -492,7 +506,7 @@ public class INF3N212Carro {
             } else {
                 System.out.println("Placa inválida!");
             }
-        } while (c == null);
+        } while (c.getPlaca() == null);
     }
 
-}//fim classe2
+}//fim classe

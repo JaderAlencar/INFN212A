@@ -9,12 +9,20 @@ package dao;
  * @author 182120009
  */
 public class DAOFactory {
+
     private static PessoaDAO pDAO = new PessoaDAO();
+    private static CarroDAO cdao = new CarroDAO();
     
-    public static PessoaDAO getPessoaDAO(){
+    
+    
+
+    public static PessoaDAO getPessoaDAO() {
         return pDAO;
-        
+
     }
-    
-    
+
+    public static CarroDAO getCarroDAO() {
+        return cdao;
+    }
+
 }
